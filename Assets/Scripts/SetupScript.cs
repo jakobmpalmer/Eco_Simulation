@@ -10,7 +10,9 @@ public class SetupScript : MonoBehaviour
 	//UnityEngine.Random random = new UnityEngine.Random();
 
 //World Spawn
-	protected int WORLD_SIZE = 20;
+	protected int WORLD_SIZE = 100;
+	public float amp = 5f;
+	public float freq = 10f;
 
 	public GameObject dirtBlock;
 	public GameObject grassBlock;
@@ -26,14 +28,16 @@ public class SetupScript : MonoBehaviour
 
 	private GameObject[] theMap;
 
+	private Vector3 myPos;
+
     // Start is called before the first frame update
     void Start()
     {
 		theMap = new GameObject[WORLD_SIZE * WORLD_SIZE];
 		InstantiateMap(WORLD_SIZE);
 		CreateBarrier();
-		SpawnFauna(5);
-		SpawnFlora();
+		SpawnFauna(10);
+		//SpawnFlora();
 	}
 
 	public void InstantiateMap(int WorldSize)
@@ -41,6 +45,7 @@ public class SetupScript : MonoBehaviour
 			
 			int count = 0;
 			
+			myPos = this.transform.position;
 
 			for (int i = 0; i < WorldSize; i++) {			
 				for (int j = 0; j < WorldSize; j++) {
@@ -51,13 +56,14 @@ public class SetupScript : MonoBehaviour
 					if(rNum <= 40 )
 					{
 						current_ground = dirtBlock;
-					} else if (rNum < 80 && rNum > 40 ){
+					// } else if (rNum < 80 && rNum > 40 ){
+					} else if (rNum < 100 && rNum > 40 ){
 						current_ground = grassBlock;
 					} else {	
 						current_ground = airBlock;
 					}
-
-					theMap[count] = Instantiate(current_ground, new Vector3(i, 0, j), Quaternion.identity);
+					Vector3 y = new Vector3(myPos.x + i, Mathf.PerlinNoise( myPos.x + i/freq, myPos.z + j/freq) * amp, myPos.z + j);
+					theMap[count] = Instantiate(current_ground, y, Quaternion.identity);
 					
 					count++;
 
@@ -70,10 +76,14 @@ public class SetupScript : MonoBehaviour
 	public void SpawnFauna(int count)
 	{
 		for(int i = 0; i < count; i++){
-			float rNumX = (Random.value * WORLD_SIZE);
-			float rNumY = (Random.value * WORLD_SIZE);
+			// float rNumX = (Random.value * WORLD_SIZE);
+			// float rNumZ = (Random.value * WORLD_SIZE);
 
-			Vector3 randomLoc = new Vector3(rNumX, 1, rNumY);
+			int rNum = (int)(Random.value * WORLD_SIZE);
+
+			// Vector3 randomLoc = new Vector3(rNumX, 20, rNumZ);
+			Vector3 randomLoc = new Vector3(theMap[rNum].transform.position.x, theMap[rNum].transform.position.y + 1, theMap[rNum].transform.position.z);
+			// Instantiate(rabbitPrefab, randomLoc, Quaternion.identity);
 			Instantiate(rabbitPrefab, randomLoc, Quaternion.identity);
 		}
 	}
